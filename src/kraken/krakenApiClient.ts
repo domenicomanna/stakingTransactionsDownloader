@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { AuthenticatedRequest, KrakenStakingTransaction } from './types';
+import { AuthenticatedRequest, KrakenApiResponse, KrakenStakingTransaction } from './types';
 import crypto from 'crypto';
 import qs from 'qs';
 import { URL } from 'url';
@@ -23,7 +23,13 @@ export class KrakenApiClient {
             },
         });
 
-        return response.data.result;
+        const apiResponse: KrakenApiResponse = response.data;
+
+        if (apiResponse.error.length > 0) {
+            throw new Error(apiResponse.error.join('. '));
+        }
+
+        return apiResponse.result;
     }
 
     private buildAuthenticatedRequest(originalRequest: any = {}): AuthenticatedRequest {

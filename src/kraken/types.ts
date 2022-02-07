@@ -3,6 +3,11 @@ export type AuthenticatedRequest = {
     otp?: string; // the one time password if 2fa is enabled for the api key
 };
 
+export type KrakenApiResponse = {
+    error: string[];
+    result: any;
+};
+
 export type KrakenStakingTransaction = {
     method: string;
     aclass: string;
