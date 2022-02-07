@@ -8,7 +8,7 @@
 
 ### Steps to run the project locally:
 
-1. Clone the project: `git clone git@github.com:domenicomanna/stakingTransactionsDownloader.git`
+1. Clone the project: `git clone https://github.com/domenicomanna/stakingTransactionsDownloader.git`
 2. `cd` into the cloned directory
 3. Set the correct node version (the required version is listed in `./.nvmrc`.):
     - Linux / Mac OS installation
