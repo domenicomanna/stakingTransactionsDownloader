@@ -1,8 +1,8 @@
 import { DateTime } from 'luxon';
-import { KrakenApiClient } from '../kraken/krakenApiClient';
-import { Logger } from '../logger/logger';
-import { StakingTransaction } from '../stakingTransactionsDownloader/types';
-import { KrakenStakingTransaction } from './types';
+import { KrakenApiClient } from '../krakenApiClient/krakenApiClient';
+import { Logger } from '../../logger/logger';
+import { StakingTransaction } from '../../stakingTransactionsDownloader/types';
+import { KrakenStakingTransaction } from '../krakenApiClient/types';
 
 export class KrakenStakingTransactionsDownloader {
     private krakenApiClient = new KrakenApiClient();

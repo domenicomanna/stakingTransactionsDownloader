@@ -1,5 +1,5 @@
 import { DateTime } from 'luxon';
-import { KrakenStakingTransactionsDownloader } from '../kraken/krakenStakingTransactionsDownloader';
+import { KrakenStakingTransactionsDownloader } from '../kraken/krakenStakingTransactionsDownloader/krakenStakingTransactionsDownloader';
 import { Logger } from '../logger/logger';
 import { SolanaStakingTransactionsDownloader } from '../solana/solanaStakingTransactionsDownloader/solanaStakingTransactionsDownloader';
 import { StakingTransaction } from './types';
