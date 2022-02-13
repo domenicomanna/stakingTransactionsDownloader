@@ -1,8 +1,10 @@
 import { KrakenStakingTransactionsDownloader } from '../kraken/krakenStakingTransactionsDownloader';
+import { SolanaStakingTransactionsDownloader } from '../solana/solanaStakingTransactionsDownloader/solanaStakingTransactionsDownloader';
 import { StakingTransaction } from './types';
 
 export class StakingTransactionsDownloader {
     private krakenStakingTransactionsDownloader = new KrakenStakingTransactionsDownloader();
+    private solanaStakingTransactionDownloader = new SolanaStakingTransactionsDownloader();
 
     /**
      *
@@ -10,9 +12,13 @@ export class StakingTransactionsDownloader {
      * going back as far as possible will be retrieved.
      */
     public async getStakingTransactions(daysAgo: number | null = null): Promise<StakingTransaction[]> {
-        const krakenStakingTransactions = await this.krakenStakingTransactionsDownloader.getStakingTransactions(
-            daysAgo
-        );
-        return krakenStakingTransactions;
+        const stakingTransactions = (
+            await Promise.all([
+                this.krakenStakingTransactionsDownloader.getStakingTransactions(daysAgo),
+                this.solanaStakingTransactionDownloader.getStakingTransactions(daysAgo),
+            ])
+        ).flat();
+
+        return stakingTransactions;
     }
 }
