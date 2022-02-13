@@ -7,12 +7,17 @@ import { KrakenStakingTransaction } from '../krakenApiClient/types';
 export class KrakenStakingTransactionsDownloader {
     private krakenApiClient = new KrakenApiClient();
     private logger: Logger;
+    private krakenApiKey = process.env.KRAKEN_API_KEY ?? '';
 
     constructor(logger: Logger) {
         this.logger = logger;
     }
 
     public async getStakingTransactions(onOrAfter: DateTime | null): Promise<StakingTransaction[]> {
+        if (!this.krakenApiKey) {
+            this.logger.log('Skipping kraken downloader because api key not provided');
+            return [];
+        }
         this.logger.log('Getting staking rewards from kraken');
         const krakenStakingTransactions = await this.krakenApiClient.getStakingTransactions();
         const filteredTransactions = this.filterTransactions(krakenStakingTransactions, onOrAfter);

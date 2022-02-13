@@ -9,12 +9,17 @@ import { SolanaStakingRewardInformation } from './types';
 export class SolanaStakingTransactionsDownloader {
     private solanaApiClient = new SolanaApiClient();
     private logger: Logger;
+    private solanaWalletAddress = process.env.SOLANA_WALLET_ADDRESS ?? '';
 
     constructor(logger: Logger) {
         this.logger = logger;
     }
 
     public async getStakingTransactions(onOrAfter: DateTime | null): Promise<StakingTransaction[]> {
+        if (!this.solanaWalletAddress) {
+            this.logger.log('Skipping solana downloader because solana wallet address not provided');
+            return [];
+        }
         this.logger.log('Getting staking rewards from solana');
         const solanaStakingRewards = await this.handleGetStakingRewards(onOrAfter);
         const convertedTransactions = this.convertTransactions(solanaStakingRewards);
