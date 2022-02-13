@@ -1,3 +1,4 @@
+import { DateTime } from 'luxon';
 import { KrakenStakingTransactionsDownloader } from '../kraken/krakenStakingTransactionsDownloader';
 import { Logger } from '../logger/logger';
 import { SolanaStakingTransactionsDownloader } from '../solana/solanaStakingTransactionsDownloader/solanaStakingTransactionsDownloader';
@@ -16,14 +17,14 @@ export class StakingTransactionsDownloader {
 
     /**
      *
-     * @param daysAgo The number of past days to include transactions from. If this is null, then all transactions
+     * @returns all staking rewards that occurred on or after the given date. If a date is not given, then all rewards
      * going back as far as possible will be retrieved.
      */
-    public async getStakingTransactions(daysAgo: number | null = null): Promise<StakingTransaction[]> {
+    public async getStakingTransactions(onOrAfter: DateTime | null = null): Promise<StakingTransaction[]> {
         const stakingTransactions = (
             await Promise.all([
-                this.krakenStakingTransactionsDownloader.getStakingTransactions(daysAgo),
-                this.solanaStakingTransactionDownloader.getStakingTransactions(daysAgo),
+                this.krakenStakingTransactionsDownloader.getStakingTransactions(onOrAfter),
+                this.solanaStakingTransactionDownloader.getStakingTransactions(onOrAfter),
             ])
         ).flat();
 

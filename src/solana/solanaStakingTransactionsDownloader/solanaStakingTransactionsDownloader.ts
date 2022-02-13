@@ -14,15 +14,15 @@ export class SolanaStakingTransactionsDownloader {
         this.logger = logger;
     }
 
-    public async getStakingTransactions(daysAgo: number | null): Promise<StakingTransaction[]> {
+    public async getStakingTransactions(onOrAfter: DateTime | null): Promise<StakingTransaction[]> {
         this.logger.log('Getting staking rewards from solana');
-        const solanaStakingRewards = await this.handleGetStakingRewards(daysAgo);
+        const solanaStakingRewards = await this.handleGetStakingRewards(onOrAfter);
         const convertedTransactions = this.convertTransactions(solanaStakingRewards);
         this.logger.log('Solana staking rewards retrieved');
         return convertedTransactions;
     }
 
-    private async handleGetStakingRewards(daysAgo: number | null): Promise<SolanaStakingRewardInformation[]> {
+    private async handleGetStakingRewards(onOrAfter: DateTime | null): Promise<SolanaStakingRewardInformation[]> {
         const stakingAccounts: StakingAccount[] = await this.solanaApiClient.getStakingAccounts();
         const stakingAccountAddresses: string[] = stakingAccounts.map((x) => x.pubkey);
         const { epoch } = await this.solanaApiClient.getCurrentEpochInformation();
@@ -31,7 +31,7 @@ export class SolanaStakingTransactionsDownloader {
 
         for (const stakingAccountAddress of stakingAccountAddresses) {
             const stakingRewardsForAddress = await this.getStakingRewardsForAddress(
-                daysAgo,
+                onOrAfter,
                 epoch,
                 stakingAccountAddress
             );
@@ -42,7 +42,7 @@ export class SolanaStakingTransactionsDownloader {
     }
 
     private async getStakingRewardsForAddress(
-        daysAgo: number | null,
+        onOrAfter: DateTime | null,
         currentEpoch: number,
         stakingAddress: string
     ): Promise<SolanaStakingRewardInformation[]> {
@@ -51,13 +51,10 @@ export class SolanaStakingTransactionsDownloader {
         let epochOfInterest: number = currentEpoch;
         let timeOfMostRecentReward: DateTime | null = null;
 
-        const startOfToday = DateTime.now().startOf('day');
-        const cutOffDate: DateTime | null = daysAgo ? startOfToday.minus({ days: daysAgo }) : null;
-
-        // only consider 'daysAgo' if it is not null, and we know the time of most recently retrieved reward
+        // only consider 'onOrAfter' if it is not null, and we know the time of most recently retrieved reward
         while (
             epochOfInterest >= 0 &&
-            (daysAgo && timeOfMostRecentReward && cutOffDate ? timeOfMostRecentReward > cutOffDate : true)
+            (onOrAfter && timeOfMostRecentReward ? timeOfMostRecentReward > onOrAfter : true)
         ) {
             this.logger.log(`Getting sol staking reward for address ${stakingAddress} on epoch ${epochOfInterest}`);
             const stakingReward = await this.getStakingRewardInformation(stakingAddress, epochOfInterest);
@@ -66,7 +63,7 @@ export class SolanaStakingTransactionsDownloader {
             timeOfMostRecentReward = timeOfReward;
             epochOfInterest -= 1;
 
-            if (!rewardAmount || (timeOfReward && cutOffDate && timeOfReward < cutOffDate)) continue;
+            if (!rewardAmount || (timeOfReward && onOrAfter && timeOfReward < onOrAfter)) continue;
 
             stakingRewards.push(stakingReward);
         }

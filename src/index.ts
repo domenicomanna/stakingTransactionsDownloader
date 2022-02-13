@@ -10,6 +10,7 @@ import path from 'path';
 import { TransactionsFileWriter } from './transactionsFileWriter/transactionsFileWriter';
 import _ from 'lodash';
 import { Logger } from './logger/logger';
+import { DateTime } from 'luxon';
 
 export type Args = {
     daysAgo: number | null;
@@ -20,13 +21,15 @@ export type Args = {
 
 const main = async (args: Args) => {
     const logger = new Logger(args.quiet);
+    const startOfToday = DateTime.now().startOf('day');
+    const oldestAllowedRewardDate = args.daysAgo ? startOfToday.minus({ days: args.daysAgo }) : null;
 
     const stakingTransactionsDownloader = new StakingTransactionsDownloader(logger);
     const pricedStakingTransactionConverter = new PricedStakingTransactionConverter(args.currency, logger);
     const transactionsFileWriter = new TransactionsFileWriter(args.outputDirectory, args.currency, logger);
 
     const stakingTransactions: StakingTransaction[] = await stakingTransactionsDownloader.getStakingTransactions(
-        args.daysAgo
+        oldestAllowedRewardDate
     );
     const pricedStakingTransactions: PricedStakingTransaction[] = await pricedStakingTransactionConverter.convert(
         stakingTransactions

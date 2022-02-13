@@ -12,24 +12,20 @@ export class KrakenStakingTransactionsDownloader {
         this.logger = logger;
     }
 
-    public async getStakingTransactions(daysAgo: number | null): Promise<StakingTransaction[]> {
+    public async getStakingTransactions(onOrAfter: DateTime | null): Promise<StakingTransaction[]> {
         this.logger.log('Getting staking rewards from kraken');
         const krakenStakingTransactions = await this.krakenApiClient.getStakingTransactions();
-        const filteredTransactions = this.filterTransactions(krakenStakingTransactions, daysAgo);
+        const filteredTransactions = this.filterTransactions(krakenStakingTransactions, onOrAfter);
         const cleanedTransactions = this.cleanTransactions(filteredTransactions);
         const convertedTransactions = this.convertTransactions(cleanedTransactions);
         this.logger.log('Kraken staking rewards retrieved');
         return convertedTransactions;
     }
 
-    private filterTransactions(transactions: KrakenStakingTransaction[], daysAgo: number | null) {
-        const startOfToday = DateTime.now().startOf('day');
-        const oldestAllowedDate = daysAgo ? startOfToday.minus({ days: daysAgo }) : null;
+    private filterTransactions(transactions: KrakenStakingTransaction[], onOrAfter: DateTime | null) {
         return transactions.filter((x) => {
             return (
-                x.type === 'reward' &&
-                x.status === 'Success' &&
-                (oldestAllowedDate ? x.time >= oldestAllowedDate.toSeconds() : true) // only apply the date filter if necessary
+                x.type === 'reward' && x.status === 'Success' && (onOrAfter ? x.time >= onOrAfter.toSeconds() : true) // only apply the date filter if necessary
             );
         });
     }
