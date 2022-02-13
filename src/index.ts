@@ -15,10 +15,11 @@ export type Args = {
     daysAgo: number | null;
     currency: string;
     outputDirectory: string;
+    quiet: boolean;
 };
 
 const main = async (args: Args) => {
-    const logger = new Logger();
+    const logger = new Logger(args.quiet);
 
     const stakingTransactionsDownloader = new StakingTransactionsDownloader(logger);
     const pricedStakingTransactionConverter = new PricedStakingTransactionConverter(args.currency, logger);
@@ -54,6 +55,12 @@ const getArguments = (): Args => {
         default: path.join(__dirname, `../transactions`),
         help: `The directory where the output file should be written. Defaults to a folder within the root directory of
          where this program is running.`,
+    });
+
+    parser.add_argument('-q', '--quiet', {
+        default: false,
+        help: `Only display errors. Default is false`,
+        action: 'store_true',
     });
 
     const args: Args = parser.parse_args();
