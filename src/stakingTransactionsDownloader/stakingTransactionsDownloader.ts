@@ -1,10 +1,18 @@
 import { KrakenStakingTransactionsDownloader } from '../kraken/krakenStakingTransactionsDownloader';
+import { Logger } from '../logger/logger';
 import { SolanaStakingTransactionsDownloader } from '../solana/solanaStakingTransactionsDownloader/solanaStakingTransactionsDownloader';
 import { StakingTransaction } from './types';
 
 export class StakingTransactionsDownloader {
-    private krakenStakingTransactionsDownloader = new KrakenStakingTransactionsDownloader();
-    private solanaStakingTransactionDownloader = new SolanaStakingTransactionsDownloader();
+    private logger: Logger;
+    private krakenStakingTransactionsDownloader;
+    private solanaStakingTransactionDownloader;
+
+    constructor(logger: Logger) {
+        this.logger = logger;
+        this.krakenStakingTransactionsDownloader = new KrakenStakingTransactionsDownloader(logger);
+        this.solanaStakingTransactionDownloader = new SolanaStakingTransactionsDownloader(logger);
+    }
 
     /**
      *
@@ -19,6 +27,7 @@ export class StakingTransactionsDownloader {
             ])
         ).flat();
 
+        this.logger.log('All staking rewards retrieved');
         return stakingTransactions;
     }
 }

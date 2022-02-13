@@ -1,16 +1,25 @@
 import { DateTime } from 'luxon';
 import { KrakenApiClient } from '../kraken/krakenApiClient';
+import { Logger } from '../logger/logger';
 import { StakingTransaction } from '../stakingTransactionsDownloader/types';
 import { KrakenStakingTransaction } from './types';
 
 export class KrakenStakingTransactionsDownloader {
     private krakenApiClient = new KrakenApiClient();
+    private logger: Logger;
+
+    constructor(logger: Logger) {
+        this.logger = logger;
+    }
 
     public async getStakingTransactions(daysAgo: number | null): Promise<StakingTransaction[]> {
+        this.logger.log('Getting staking rewards from kraken');
         const krakenStakingTransactions = await this.krakenApiClient.getStakingTransactions();
         const filteredTransactions = this.filterTransactions(krakenStakingTransactions, daysAgo);
         const cleanedTransactions = this.cleanTransactions(filteredTransactions);
-        return this.convertTransactions(cleanedTransactions);
+        const convertedTransactions = this.convertTransactions(cleanedTransactions);
+        this.logger.log('Kraken staking rewards retrieved');
+        return convertedTransactions;
     }
 
     private filterTransactions(transactions: KrakenStakingTransaction[], daysAgo: number | null) {

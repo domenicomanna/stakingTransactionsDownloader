@@ -9,6 +9,7 @@ import { PricedStakingTransaction } from './pricedStakingTransactionConverter/ty
 import path from 'path';
 import { TransactionsFileWriter } from './transactionsFileWriter/transactionsFileWriter';
 import _ from 'lodash';
+import { Logger } from './logger/logger';
 
 export type Args = {
     daysAgo: number | null;
@@ -17,9 +18,11 @@ export type Args = {
 };
 
 const main = async (args: Args) => {
-    const stakingTransactionsDownloader = new StakingTransactionsDownloader();
-    const pricedStakingTransactionConverter = new PricedStakingTransactionConverter(args.currency);
-    const transactionsFileWriter = new TransactionsFileWriter(args.outputDirectory, args.currency);
+    const logger = new Logger();
+
+    const stakingTransactionsDownloader = new StakingTransactionsDownloader(logger);
+    const pricedStakingTransactionConverter = new PricedStakingTransactionConverter(args.currency, logger);
+    const transactionsFileWriter = new TransactionsFileWriter(args.outputDirectory, args.currency, logger);
 
     const stakingTransactions: StakingTransaction[] = await stakingTransactionsDownloader.getStakingTransactions(
         args.daysAgo

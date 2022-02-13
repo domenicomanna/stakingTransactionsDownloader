@@ -1,22 +1,27 @@
 import { CryptoCompareApiClient } from '../cryptoCompareApi/cryptoCompareApiClient';
 import { GetPricesRequest, GetPricesResponse, PriceInformation } from '../cryptoCompareApi/types';
+import { Logger } from '../logger/logger';
 import { StakingTransaction } from '../stakingTransactionsDownloader/types';
 import { PricedStakingTransaction } from './types';
 
 export class PricedStakingTransactionConverter {
     private currencyCode: string;
     private cryptoCompareApiClient = new CryptoCompareApiClient();
+    private logger: Logger;
 
     /**
      *
      * @param currencyCode the code of the currency that will be used to retrieve the price of the crypto assets
      */
-    constructor(currencyCode: string) {
+    constructor(currencyCode: string, logger: Logger) {
         this.currencyCode = currencyCode;
+        this.logger = logger;
     }
 
     public async convert(transactions: StakingTransaction[]): Promise<PricedStakingTransaction[]> {
-        return await Promise.all(
+        this.logger.log('Adding prices to staking rewards...');
+
+        const pricedStakingRewards = await Promise.all(
             transactions.map(async (x): Promise<PricedStakingTransaction> => {
                 const price = await this.getPrice(x);
                 const rewardAmountInCurrency = price * x.amount;
@@ -28,6 +33,9 @@ export class PricedStakingTransactionConverter {
                 };
             })
         );
+
+        this.logger.log('Prices added');
+        return pricedStakingRewards;
     }
 
     private async getPrice(transaction: StakingTransaction): Promise<number> {

@@ -1,5 +1,6 @@
 import { DateTime } from 'luxon';
 import { constants } from '../../constants';
+import { Logger } from '../../logger/logger';
 import { StakingTransaction } from '../../stakingTransactionsDownloader/types';
 import { SolanaApiClient } from '../solanaApiClient/solanaApiClient';
 import { InflationReward, StakingAccount } from '../solanaApiClient/types';
@@ -7,10 +8,18 @@ import { SolanaStakingRewardInformation } from './types';
 
 export class SolanaStakingTransactionsDownloader {
     private solanaApiClient = new SolanaApiClient();
+    private logger: Logger;
+
+    constructor(logger: Logger) {
+        this.logger = logger;
+    }
 
     public async getStakingTransactions(daysAgo: number | null): Promise<StakingTransaction[]> {
+        this.logger.log('Getting staking rewards from solana');
         const solanaStakingRewards = await this.handleGetStakingRewards(daysAgo);
-        return this.convertTransactions(solanaStakingRewards);
+        const convertedTransactions = this.convertTransactions(solanaStakingRewards);
+        this.logger.log('Solana staking rewards retrieved');
+        return convertedTransactions;
     }
 
     private async handleGetStakingRewards(daysAgo: number | null): Promise<SolanaStakingRewardInformation[]> {
@@ -50,6 +59,7 @@ export class SolanaStakingTransactionsDownloader {
             epochOfInterest >= 0 &&
             (daysAgo && timeOfMostRecentReward && cutOffDate ? timeOfMostRecentReward > cutOffDate : true)
         ) {
+            this.logger.log(`Getting sol staking reward for address ${stakingAddress} on epoch ${epochOfInterest}`);
             const stakingReward = await this.getStakingRewardInformation(stakingAddress, epochOfInterest);
 
             const { timeOfReward, rewardAmount } = stakingReward;

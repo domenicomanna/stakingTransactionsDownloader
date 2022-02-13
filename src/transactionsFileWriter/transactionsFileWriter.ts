@@ -2,6 +2,7 @@ import { writeToPath } from '@fast-csv/format';
 import path from 'path';
 import fs from 'fs';
 import { PricedStakingTransaction } from '../pricedStakingTransactionConverter/types';
+import { Logger } from '../logger/logger';
 
 type FileWritingOptions = {
     outputDirectory: string;
@@ -13,19 +14,21 @@ type FileWritingOptions = {
 export class TransactionsFileWriter {
     private currencyFormatter: Intl.NumberFormat;
     private outputDirectory: string;
+    private logger: Logger;
 
     /**
      *
      * @param outputDirectory - the directory where all files will be written
      * @param currencyCode - the currency code that will be used when formatting currencies
      */
-    constructor(outputDirectory: string, currencyCode: string) {
+    constructor(outputDirectory: string, currencyCode: string, logger: Logger) {
         this.outputDirectory = outputDirectory;
         this.currencyFormatter = new Intl.NumberFormat(undefined, {
             style: 'currency',
             currency: currencyCode,
             maximumFractionDigits: 8,
         });
+        this.logger = logger;
     }
 
     public writeTransactions = async (transactions: PricedStakingTransaction[], filename: string): Promise<void> => {
@@ -80,7 +83,7 @@ export class TransactionsFileWriter {
                 delimiter: ',',
                 rowDelimiter: '\n',
             }).on('finish', () => {
-                console.log(`Transactions written to ${filePath}`);
+                this.logger.log(`Rewards written to ${filePath}`);
                 resolve(undefined);
             });
         });
