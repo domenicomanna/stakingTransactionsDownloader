@@ -26,7 +26,7 @@ export class TransactionsFileWriter {
         this.currencyFormatter = new Intl.NumberFormat(undefined, {
             style: 'currency',
             currency: currencyCode,
-            maximumFractionDigits: 8,
+            maximumFractionDigits: 12,
         });
         this.logger = logger;
     }
