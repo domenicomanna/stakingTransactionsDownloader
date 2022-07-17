@@ -48,7 +48,7 @@ export class TransactionsFileWriter {
                 month: '2-digit',
                 day: '2-digit',
             }),
-            `${x.asset}/${x.currencyCode}`,
+            `${x.asset.toUpperCase()}/${x.currencyCode.toUpperCase()}`,
             this.currencyFormatter.format(x.rewardAmountInCurrency),
             x.amount.toString(),
             this.currencyFormatter.format(x.price),
