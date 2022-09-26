@@ -43,8 +43,8 @@ export class KrakenStakingTransactionsDownloader {
     }
 
     private cleanAssetName(assetName: string) {
-        let cleanedName = assetName.slice(0, assetName.indexOf('.')); // remove the period and anything beyond
-        cleanedName = cleanedName.toLowerCase() === 'eth2' ? 'eth' : cleanedName; // remove the 2 if the asset is eth2
+        let cleanedName = assetName.split('.')[0]; // remove the period and anything beyond
+        cleanedName = cleanedName.toLowerCase().includes('eth') ? 'eth' : cleanedName;
         return cleanedName;
     }
 
